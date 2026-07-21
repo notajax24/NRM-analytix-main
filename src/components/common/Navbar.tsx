@@ -15,6 +15,7 @@ import AccountTree from '@mui/icons-material/AccountTree';
 import Insights from '@mui/icons-material/Insights';
 import WorkOutline from '@mui/icons-material/WorkOutlineOutlined';
 import { Handshake } from '@mui/icons-material';
+import Route from '@mui/icons-material/Route';
 
 import { Link, useLocation } from 'react-router-dom';
 import logoNRM from '../../assets/logoNRM.png';
@@ -28,7 +29,7 @@ const navLinks = [
       {
         label: "Code Switch",
         path: "/products/code-switch",
-        description: "Intelligent metadata management and automated data lineage tracking.",
+        description: "Seamless code migration and transformation across languages and frameworks.",
         icon: <CodeIcon sx={{ color: '#6b21a8' }} />
       },
       {
@@ -46,14 +47,20 @@ const navLinks = [
       {
         label: "Talend Job Analyzer",
         path: "/products/talend-job-analyzer",
-        description: "Empower recruiting teams with AI-driven insights to analyze jobs.",
+        description: "Deep visibility into Talend ETL jobs with AI-driven performance and error analysis.",
         icon: <WorkOutline sx={{ color: '#f59e0b' }} />
       },
       {
         label: "Dev Sync",
         path: "/products/dev-sync",
-        description: "Empower recruiting teams with AI-driven insights to analyze jobs.",
+        description: "Real-time synchronization of code, environments, and deployments across your dev teams.",
         icon: <SyncAlt sx={{ color: '#f59e0b' }} />
+      },
+      {
+        label: "TrailMe",
+        path: "#",
+        description: "Track and audit every data and process change with a complete, end-to-end trail.",
+        icon: <Route sx={{ color: '#8B5E3C' }} />
       }
     ]
   },
@@ -316,8 +323,9 @@ export default function Navbar() {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Button
-            component={Link}
-            to="/contact"
+            component="a"
+            href="https://forms.office.com/pages/responsepage.aspx?id=_nwNTqL-QE-5n6lqq1AQ_q2wzWFkTJFJmd-1-0iJpeZUREYzQVpSUjBJSlBaRVFXS082TEVGMUdIUS4u&route=shorturl"
+            target="_blank"
             rel="noopener noreferrer"
             onClick={() => mobileOpen && handleDrawerToggle()}
             variant="contained"
