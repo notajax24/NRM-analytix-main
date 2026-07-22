@@ -1,6 +1,18 @@
-import { Box, Typography, Container, Button, Stack, Card, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Container,
+  Button,
+  Grid,
+  Stack,
+  Card,
+  CircularProgress,
+  RadioGroup,
+  FormControlLabel,
+  Radio
+} from '@mui/material';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 
 // Reusable scroll animation wrapper
 const FadeUp = ({ children, delay = 0 }: { children: ReactNode; delay?: number }) => {
@@ -67,21 +79,36 @@ const CustomInput = ({ label, required, isTextArea = false, name, value, onChang
 export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
-    company: '',
-    email: '',
     phone: '',
+    email: '',
+    service: '',
+    otherService: '',
     message: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string | null>>({
     name: null,
-    company: null,
-    email: null,
     phone: null,
+    email: null,
+    service: null,
     message: null,
   });
 
   const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  // Options matching the screenshot + TrailMe
+  const serviceOptions = [
+    "Databricks Consulting",
+    "Databricks Migration & Modernization",
+    "Data Management & Governance",
+    "Big Data Infrastructure Consulting",
+    "Data Platform / Lakehouse Build",
+    "ClickHouse Consulting & Implementation",
+    "Free 1-Week POC",
+    "Partnership",
+    "TrailMe",
+    "Other"
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -99,15 +126,18 @@ export default function ContactSection() {
       newErrors.name = 'Full Name is required.';
       isValid = false;
     }
-    if (!formData.company.trim()) {
-      newErrors.company = 'Company Name is required.';
-      isValid = false;
-    }
     if (!formData.email.trim()) {
-      newErrors.email = 'Business Email is required.';
+      newErrors.email = 'Contact Email Address is required.';
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address.';
+      isValid = false;
+    }
+    if (!formData.service) {
+      newErrors.service = 'Please select a service.';
+      isValid = false;
+    } else if (formData.service === 'Other' && !formData.otherService.trim()) {
+      newErrors.service = 'Please specify the other service.';
       isValid = false;
     }
     if (!formData.message.trim()) {
@@ -134,7 +164,7 @@ export default function ContactSection() {
       }
 
       setSubmissionStatus('success');
-      setFormData({ name: '', company: '', email: '', phone: '', message: '' });
+      setFormData({ name: '', phone: '', email: '', service: '', otherService: '', message: '' });
     } catch (error) {
       setSubmissionStatus('error');
       setTimeout(() => setSubmissionStatus('idle'), 5000);
@@ -149,19 +179,10 @@ export default function ContactSection() {
       position: 'relative'
     }}>
       <Container maxWidth="lg">
-        {/* Responsive two-column layout */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { sm: 'center' },
-            gap: { xs: 6, sm: 8 },
-          }}
-        >
+        <Grid container spacing={6} sx={{ alignItems: 'flex-start' }}>
 
           {/* ================= LEFT COLUMN (Content & Info) ================= */}
-          <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 50%' }, minWidth: 0 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FadeUp delay={100}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#7c3aed' }} />
@@ -170,7 +191,7 @@ export default function ContactSection() {
                 </Typography>
               </Box>
 
-              <Typography variant="h2" sx={{ fontWeight: 300, color: '#1e293b', fontSize: { xs: '2.5rem', md: '3.75rem' }, mb: 4, lineHeight: 1.1 }}>
+              <Typography variant="h2" sx={{ fontWeight: 300, color: '#1e293b', fontSize: { xs: '2.5rem', md: '3.25rem' }, mb: 4, lineHeight: 1.15 }}>
                 Let's Talk About<br />
                 <Box component="span" sx={{ color: '#ef4444', fontWeight: 400 }}>Your Data</Box>
               </Typography>
@@ -219,10 +240,10 @@ export default function ContactSection() {
                 />
               </Box>
             </FadeUp>
-          </Box>
+          </Grid>
 
           {/* ================= RIGHT COLUMN (The Form UI) ================= */}
-          <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 50%' }, minWidth: 0 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FadeUp delay={400}>
               <Card elevation={0} sx={{
                 p: { xs: 4, sm: 5, md: 6 },
@@ -232,23 +253,90 @@ export default function ContactSection() {
                 border: '1px solid rgba(0,0,0,0.03)',
                 minHeight: 500,
                 display: 'flex',
-                alignItems: 'center',
+                flexDirection: 'column',
                 justifyContent: 'center'
               }}>
 
                 {submissionStatus === 'success' ? (
-                  <Box sx={{ textAlign: 'center', p: 4 }}>
+                  <Box sx={{ textAlign: 'center', p: 4, my: 'auto' }}>
                     <CheckCircleOutlineIcon sx={{ fontSize: 60, color: 'success.main', mb: 2 }} />
                     <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, color: '#1e293b' }}>Message Sent!</Typography>
                     <Typography sx={{ color: '#475569' }}>Thank you for reaching out. We'll get back to you shortly.</Typography>
                   </Box>
                 ) : (
-                  <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                  // Added noValidate here to prevent the black native browser tooltip
+                  <form onSubmit={handleSubmit} style={{ width: '100%' }} noValidate>
                     <CustomInput label="Full Name" name="name" value={formData.name} onChange={handleChange} required errorText={errors.name} />
-                    <CustomInput label="Company Name" name="company" value={formData.company} onChange={handleChange} required errorText={errors.company} />
-                    <CustomInput label="Business Email" name="email" value={formData.email} onChange={handleChange} required errorText={errors.email} />
-                    <CustomInput label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} errorText={errors.phone} />
-                    <CustomInput label="How Can We Help You?" name="message" value={formData.message} onChange={handleChange} required isTextArea errorText={errors.message} />
+                    <CustomInput label="Contact Number" name="phone" value={formData.phone} onChange={handleChange} errorText={errors.phone} />
+                    <CustomInput label="Contact Email Address" name="email" value={formData.email} onChange={handleChange} required errorText={errors.email} />
+
+                    {/* CUSTOM RADIO GROUP MATCHING SCREENSHOT */}
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" sx={{ color: '#475569', mb: 1, fontWeight: 500, fontSize: '0.85rem' }}>
+                        Service Interested In <Box component="span" sx={{ color: '#ef4444' }}>*</Box>
+                      </Typography>
+                      <RadioGroup
+                        name="service"
+                        value={formData.service}
+                        onChange={handleChange}
+                        sx={{ gap: 0.5 }}
+                      >
+                        {serviceOptions.map((option) => (
+                          <FormControlLabel
+                            key={option}
+                            value={option}
+                            control={<Radio sx={{ color: '#94a3b8', '&.Mui-checked': { color: '#7c3aed' } }} />}
+                            label={
+                              option === 'Other' ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                                  <Typography sx={{ fontSize: '0.95rem', color: '#1e293b' }}>Other</Typography>
+                                  {formData.service === 'Other' && (
+                                    <Box
+                                      component="input"
+                                      name="otherService"
+                                      value={formData.otherService}
+                                      onChange={handleChange}
+                                      placeholder="Please specify..."
+                                      sx={{
+                                        bgcolor: '#ffffff',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '8px',
+                                        px: 2,
+                                        py: 1,
+                                        fontSize: '0.9rem',
+                                        color: '#1e293b',
+                                        outline: 'none',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                                        transition: 'all 0.2s ease',
+                                        '&:focus': {
+                                          borderColor: 'rgba(124, 58, 237, 0.4)',
+                                          boxShadow: '0 0 0 2px rgba(124, 58, 237, 0.2)'
+                                        }
+                                      }}
+                                    />
+                                  )}
+                                </Box>
+                              ) : (
+                                <Typography sx={{ fontSize: '0.95rem', color: '#1e293b' }}>
+                                  {option}
+                                </Typography>
+                              )
+                            }
+                            sx={{
+                              ml: 0,
+                              '& .MuiFormControlLabel-label': { width: '100%' }
+                            }}
+                          />
+                        ))}
+                      </RadioGroup>
+                      {errors.service && (
+                        <Typography variant="caption" sx={{ color: '#ef4444', mt: 0.5, display: 'block' }}>
+                          {errors.service}
+                        </Typography>
+                      )}
+                    </Box>
+
+                    <CustomInput label="Tell us more about your requirement" name="message" value={formData.message} onChange={handleChange} required isTextArea errorText={errors.message} />
 
                     <Button
                       type="submit"
@@ -289,8 +377,9 @@ export default function ContactSection() {
 
               </Card>
             </FadeUp>
-          </Box>
-        </Box>
+          </Grid>
+
+        </Grid>
       </Container>
     </Box>
   );

@@ -323,6 +323,8 @@ export default function Navbar() {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Button
+            // component={Link}
+            // to="/contact"
             component="a"
             href="https://forms.office.com/pages/responsepage.aspx?id=_nwNTqL-QE-5n6lqq1AQ_q2wzWFkTJFJmd-1-0iJpeZUREYzQVpSUjBJSlBaRVFXS082TEVGMUdIUS4u&route=shorturl"
             target="_blank"
